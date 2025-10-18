@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { QuestionCard } from "@/components/QuestionCard";
 import { QuizProgress } from "@/components/QuizProgress";
@@ -7,14 +7,33 @@ import { questions } from "@/data/questions";
 import { QuizState } from "@/types/quiz";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 
+const STORAGE_KEY = "snowflake-quiz-progress";
+
 const Index = () => {
-  const [quizState, setQuizState] = useState<QuizState>({
-    currentQuestion: 0,
-    answers: Array(questions.length).fill(null),
-    showResults: false,
+  const [quizState, setQuizState] = useState<QuizState>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return {
+      currentQuestion: 0,
+      answers: Array(questions.length).fill(null),
+      showResults: false,
+    };
   });
 
-  const [showFeedback, setShowFeedback] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const state = JSON.parse(saved);
+      return state.answers[state.currentQuestion] !== null;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(quizState));
+  }, [quizState]);
 
   const currentQuestion = questions[quizState.currentQuestion];
   const currentAnswer = quizState.answers[quizState.currentQuestion];
@@ -53,12 +72,14 @@ const Index = () => {
   };
 
   const handleRestart = () => {
-    setQuizState({
+    const newState = {
       currentQuestion: 0,
       answers: Array(questions.length).fill(null),
       showResults: false,
-    });
+    };
+    setQuizState(newState);
     setShowFeedback(false);
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   if (quizState.showResults) {
