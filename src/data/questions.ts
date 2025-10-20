@@ -3,652 +3,652 @@ import { Question } from "@/types/quiz";
 export const questions: Question[] = [
   {
     id: 1,
-    question: "What is a Virtual Warehouse in Snowflake?",
+    question: "A data engineer needs to load 10 TB of historical data into Snowflake. The files are stored in an S3 bucket and need to be loaded daily. Which approach would be MOST cost-effective and efficient?",
     options: [
-      "A physical data storage location",
-      "A cluster of compute resources that execute queries and DML operations",
-      "A type of database schema",
-      "A backup storage system"
+      "Use Snowpipe with auto-ingest for continuous loading",
+      "Use COPY INTO with a large warehouse scheduled during off-peak hours",
+      "Use INSERT statements with a medium warehouse",
+      "Use Snowpipe REST API with manual triggers every hour"
     ],
     correctAnswer: 1,
-    explanation: "A Virtual Warehouse is a cluster of compute resources (CPU, memory, and temporary storage) that Snowflake uses to execute queries and perform DML operations. It is separate from storage, allowing independent scaling of compute and storage resources.",
-    category: "Architecture"
+    explanation: "For large batch loads of historical data on a daily schedule, COPY INTO with a large warehouse during off-peak hours is most cost-effective. Snowpipe is designed for continuous micro-batch loading and would be more expensive for bulk loads. Using a larger warehouse for bulk operations completes faster and can be more cost-effective than running a smaller warehouse longer.",
+    category: "Data Loading"
   },
   {
     id: 2,
-    question: "Which of the following statements about Snowflake's Time Travel feature is TRUE?",
+    question: "Your organization has a multi-cluster warehouse with MIN_CLUSTER_COUNT = 2 and MAX_CLUSTER_COUNT = 5. During peak hours, you notice query queueing even though only 3 clusters are running. What is the MOST likely cause?",
     options: [
-      "Time Travel is only available for Enterprise Edition",
-      "Time Travel allows querying historical data within a defined period",
-      "Time Travel permanently stores all data changes",
-      "Time Travel requires additional storage costs"
+      "The SCALING_POLICY is set to ECONOMY mode",
+      "The warehouse size is too small",
+      "The MAX_CLUSTER_COUNT is too low",
+      "Time Travel is consuming cluster resources"
     ],
-    correctAnswer: 1,
-    explanation: "Time Travel allows you to access historical data (i.e., data that has been changed or deleted) at any point within a defined period. It's available in all Snowflake editions with retention periods up to 90 days (Enterprise Edition and higher), and it uses Snowflake's existing storage without additional costs beyond standard storage fees.",
-    category: "Data Protection"
+    correctAnswer: 0,
+    explanation: "When SCALING_POLICY is set to ECONOMY, Snowflake favors conserving credits over warehouse availability, meaning it will allow some query queueing before spinning up additional clusters. With STANDARD mode, clusters spin up immediately to prevent queueing. The queueing behavior described is characteristic of ECONOMY mode.",
+    category: "Resource Management"
   },
   {
     id: 3,
-    question: "What is the purpose of Snowflake's Zero-Copy Cloning feature?",
+    question: "A table has been accidentally dropped. The table had a DATA_RETENTION_TIME_IN_DAYS of 10, and it was dropped 5 days ago. The account is on Enterprise Edition. What is the BEST way to recover the table?",
     options: [
-      "To compress data and reduce storage costs",
-      "To create a full copy of data that requires additional storage",
-      "To create a metadata copy that doesn't duplicate the underlying data",
-      "To automatically backup data every hour"
+      "Contact Snowflake Support to recover from Fail-safe",
+      "Use UNDROP TABLE command",
+      "Restore from a previous Zero-Copy Clone",
+      "The table cannot be recovered"
     ],
-    correctAnswer: 2,
-    explanation: "Zero-Copy Cloning creates a snapshot of a database, schema, or table by creating metadata pointers to the existing data rather than physically copying it. This means the clone is created almost instantaneously and requires no additional storage until changes are made to either the original or the clone.",
-    category: "Data Management"
+    correctAnswer: 1,
+    explanation: "Since the table was dropped only 5 days ago and had a 10-day retention period, it's still within the Time Travel window. The UNDROP TABLE command can restore dropped tables, schemas, and databases within their retention period. Fail-safe is only for recovery after Time Travel expires and requires Snowflake Support intervention.",
+    category: "Data Protection"
   },
   {
     id: 4,
-    question: "Which Snowflake feature allows you to load data continuously as it arrives in a stage?",
+    question: "Which statement about Snowflake's micro-partitions is TRUE regarding their impact on query performance?",
     options: [
-      "COPY INTO command",
-      "Snowpipe",
-      "Time Travel",
-      "External Tables"
+      "Micro-partitions are always 16 MB in size after compression",
+      "Queries benefit from partition pruning based on metadata stored in the cloud services layer",
+      "Users must manually define partition keys like in traditional databases",
+      "Micro-partitions are only created for tables larger than 1 TB"
     ],
     correctAnswer: 1,
-    explanation: "Snowpipe enables loading data from files as soon as they're available in a stage. It uses serverless compute resources and can be triggered automatically using cloud notifications (like AWS S3 events or Azure Event Grid), making it ideal for continuous, automated data ingestion.",
-    category: "Data Loading"
-  },
-  {
-    id: 5,
-    question: "What is the smallest unit of data storage in Snowflake?",
-    options: [
-      "Row",
-      "Block",
-      "Micro-partition",
-      "Page"
-    ],
-    correctAnswer: 2,
-    explanation: "Snowflake stores data in micro-partitions, which are contiguous units of storage. Each micro-partition contains between 50 MB and 500 MB of uncompressed data. Snowflake automatically organizes data into micro-partitions and maintains metadata about all rows stored in each micro-partition, enabling efficient query pruning.",
+    explanation: "Snowflake automatically creates micro-partitions and maintains detailed metadata about the min/max values of each column in each micro-partition. This metadata is stored in the cloud services layer and enables automatic partition pruning during query execution, significantly improving performance without manual intervention.",
     category: "Architecture"
   },
   {
-    id: 6,
-    question: "Which authentication method is NOT natively supported by Snowflake?",
+    id: 5,
+    question: "A company wants to share live data with a customer who does NOT have a Snowflake account. What is the recommended approach?",
     options: [
-      "Key Pair Authentication",
-      "OAuth",
-      "SAML 2.0 (SSO)",
-      "Biometric Authentication"
+      "Create a Reader Account and share data through it",
+      "Export data to S3 and provide access credentials",
+      "Create a regular Snowflake Share",
+      "Use external tables pointing to customer's cloud storage"
     ],
-    correctAnswer: 3,
-    explanation: "Snowflake natively supports several authentication methods including password-based authentication, multi-factor authentication (MFA), federated authentication (SAML 2.0/SSO), OAuth, and key pair authentication. However, biometric authentication is not a natively supported authentication method in Snowflake.",
-    category: "Security"
-  },
-  {
-    id: 7,
-    question: "What happens when you suspend a Virtual Warehouse?",
-    options: [
-      "All data in the warehouse is deleted",
-      "Queries currently running are cancelled",
-      "The warehouse stops consuming compute credits but retains its configuration",
-      "The warehouse is permanently removed"
-    ],
-    correctAnswer: 2,
-    explanation: "When you suspend a Virtual Warehouse, it stops consuming compute credits while retaining its configuration. Any queries currently running will complete, but no new queries can be executed until the warehouse is resumed. This is useful for controlling costs when the warehouse is not needed.",
-    category: "Resource Management"
-  },
-  {
-    id: 8,
-    question: "What is the purpose of a Snowflake Share?",
-    options: [
-      "To divide compute resources among users",
-      "To provide secure, read-only access to database objects with other Snowflake accounts",
-      "To split storage costs across departments",
-      "To backup data automatically"
-    ],
-    correctAnswer: 1,
-    explanation: "Snowflake Shares enable secure data sharing between Snowflake accounts without actually copying or transferring data. The data provider shares selected database objects with one or more consumer accounts, who can then access the shared data in real-time. This is read-only access and leverages Snowflake's architecture to provide instant, secure data sharing.",
+    correctAnswer: 0,
+    explanation: "Reader Accounts are specifically designed for sharing data with organizations that don't have their own Snowflake account. The data provider provisions and manages the Reader Account, and the consumer accesses shared data through it. The provider pays for compute used by the Reader Account.",
     category: "Data Sharing"
   },
   {
-    id: 9,
-    question: "Which file format is NOT supported for loading data into Snowflake?",
+    id: 6,
+    question: "You are loading JSON files into a table with a VARIANT column. After loading, queries filtering on specific JSON attributes are slow. What would MOST improve query performance?",
     options: [
-      "CSV",
-      "JSON",
-      "Parquet",
-      "HTML"
+      "Increase the warehouse size",
+      "Create a materialized view extracting frequently accessed attributes",
+      "Enable result caching",
+      "Compress the JSON files before loading"
     ],
-    correctAnswer: 3,
-    explanation: "Snowflake supports various structured and semi-structured file formats including CSV, JSON, Avro, ORC, Parquet, and XML. However, HTML is not a supported file format for loading data as it's primarily a markup language for web content rather than a data storage format.",
+    correctAnswer: 1,
+    explanation: "Creating a materialized view that extracts frequently queried attributes from the VARIANT column into regular columns allows Snowflake to leverage micro-partition pruning and clustering for those columns, dramatically improving query performance.",
+    category: "Performance"
+  },
+  {
+    id: 7,
+    question: "When using the COPY INTO command with ON_ERROR = 'CONTINUE', what happens when the command encounters a file with formatting errors?",
+    options: [
+      "The entire COPY command fails and no data is loaded",
+      "The file with errors is skipped entirely and other files are loaded",
+      "Only the error rows in the file are skipped; valid rows in the same file are loaded",
+      "The command pauses and waits for manual intervention"
+    ],
+    correctAnswer: 1,
+    explanation: "With ON_ERROR = 'CONTINUE', if a file contains errors, that entire file is skipped and not loaded. The COPY operation continues with the remaining files.",
     category: "Data Loading"
   },
   {
-    id: 10,
-    question: "What is the maximum retention period for Time Travel in Snowflake Enterprise Edition?",
+    id: 8,
+    question: "A Stream has been created on a table to capture changes. What happens to the Stream when a table is dropped and then restored using UNDROP?",
     options: [
-      "1 day",
-      "7 days",
-      "30 days",
-      "90 days"
-    ],
-    correctAnswer: 3,
-    explanation: "In Snowflake Enterprise Edition (and higher), the maximum Time Travel retention period is 90 days. This allows you to query, clone, and restore data that has been changed or deleted within this period. Standard Edition has a maximum retention period of 1 day.",
-    category: "Data Protection"
-  },
-  {
-    id: 11,
-    question: "What is the primary benefit of Snowflake's multi-cluster warehouse feature?",
-    options: [
-      "Reduces storage costs",
-      "Automatically scales compute resources to handle concurrent queries",
-      "Encrypts data at rest",
-      "Provides automatic failover"
+      "The Stream automatically reconnects and continues tracking changes",
+      "The Stream becomes stale and must be recreated",
+      "The Stream retains all change history from before the drop",
+      "The Stream is automatically dropped with the table"
     ],
     correctAnswer: 1,
-    explanation: "Multi-cluster warehouses automatically scale compute resources by adding or removing clusters based on the number of concurrent user queries and the query load. This ensures consistent query performance during peak usage times.",
-    category: "Resource Management"
+    explanation: "When a source table is dropped, any Streams on that table become stale. Even if you use UNDROP to restore the table, the Stream remains stale and must be recreated.",
+    category: "Data Pipelines"
   },
   {
-    id: 12,
-    question: "Which Snowflake object is used to define access control?",
+    id: 9,
+    question: "Your organization requires customer-managed encryption keys. Which edition supports Tri-Secret Secure?",
     options: [
-      "Schema",
-      "Role",
-      "Stage",
-      "Pipe"
+      "Enterprise Edition",
+      "Business Critical Edition",
+      "Standard Edition",
+      "All editions with AWS KMS"
     ],
     correctAnswer: 1,
-    explanation: "Roles are used in Snowflake to define access control. Privileges are granted to roles, and roles are then assigned to users. Snowflake uses a role-based access control (RBAC) model.",
+    explanation: "Tri-Secret Secure is available only in Business Critical Edition that enables customer-managed encryption keys combined with Snowflake-managed keys.",
     category: "Security"
   },
   {
-    id: 13,
-    question: "What is a Stage in Snowflake?",
+    id: 10,
+    question: "A warehouse has AUTO_SUSPEND = 600. A query completes at 2:00 PM with no subsequent activity. When will the warehouse suspend?",
     options: [
-      "A temporary compute resource",
-      "A location where data files are stored before loading into Snowflake tables",
-      "A backup of the database",
-      "A type of view"
+      "At 2:10 PM",
+      "At 2:08 PM",
+      "At 2:11 PM",
+      "Immediately after the query"
+    ],
+    correctAnswer: 0,
+    explanation: "AUTO_SUSPEND is measured from when the warehouse last completed work. The warehouse suspends exactly 10 minutes (600 seconds) after 2:00 PM.",
+    category: "Resource Management"
+  },
+  {
+    id: 11,
+    question: "Data arrives in S3 every 5 minutes (50 MB files) and must be queryable within 2 minutes. What's the BEST loading strategy?",
+    options: [
+      "Schedule a Task every 2 minutes with COPY INTO",
+      "Use Snowpipe with S3 event notifications",
+      "Use a medium warehouse with scheduled COPY every 5 minutes",
+      "Use external tables"
     ],
     correctAnswer: 1,
-    explanation: "A Stage is a location where data files are stored before loading them into Snowflake tables. Stages can be internal (managed by Snowflake) or external (cloud storage like S3, Azure Blob Storage, or GCS).",
+    explanation: "Snowpipe with S3 event notifications provides near real-time loading (1-2 minutes) and is purpose-built for continuous streaming data ingestion.",
     category: "Data Loading"
   },
   {
-    id: 14,
-    question: "What does Snowflake's VARIANT data type store?",
+    id: 12,
+    question: "A 500M row table with daily updates/deletes shows degrading query performance. What maintenance would MOST help?",
     options: [
-      "Only JSON data",
-      "Only XML data",
-      "Semi-structured data including JSON, Avro, ORC, Parquet, and XML",
-      "Only numerical data"
+      "Run VACUUM TABLE",
+      "Execute ALTER TABLE ... RECLUSTER",
+      "Increase DATA_RETENTION_TIME_IN_DAYS",
+      "Create indexes"
+    ],
+    correctAnswer: 1,
+    explanation: "Heavy DML causes clustering degradation. ALTER TABLE ... RECLUSTER reorganizes micro-partitions to improve partition pruning and performance.",
+    category: "Performance"
+  },
+  {
+    id: 13,
+    question: "In Secure Data Sharing, who pays for what?",
+    options: [
+      "Consumer pays for storage",
+      "Consumer uses provider's warehouse",
+      "Consumer pays only for compute to query shared data",
+      "Data is copied to consumer's account"
     ],
     correctAnswer: 2,
-    explanation: "The VARIANT data type is designed to store semi-structured data. It can hold values of any other type, including OBJECT and ARRAY, making it ideal for storing JSON, Avro, ORC, Parquet, and XML data.",
-    category: "Data Types"
+    explanation: "No data is copied. Provider pays storage, consumer pays only for their own compute resources to query the shared data.",
+    category: "Data Sharing"
+  },
+  {
+    id: 14,
+    question: "A task runs every 60 minutes but takes 75 minutes to complete. What happens?",
+    options: [
+      "Next run starts immediately after",
+      "Next run is skipped to prevent overlap",
+      "Both run in parallel",
+      "Task auto-increases warehouse size"
+    ],
+    correctAnswer: 1,
+    explanation: "Tasks don't run in parallel by default. If still running when next execution is scheduled, that execution is skipped to prevent overlap.",
+    category: "Automation"
   },
   {
     id: 15,
-    question: "What is Fail-safe in Snowflake?",
+    question: "For a 1B row table spanning 5 years with DATE column filters, what provides the MOST performance improvement?",
     options: [
-      "A feature that prevents query failures",
-      "A 7-day period for data recovery by Snowflake Support after Time Travel expires",
-      "A backup warehouse that activates automatically",
-      "A feature that prevents accidental deletions"
+      "Define clustering key on DATE column",
+      "Create search optimization on DATE",
+      "Increase warehouse from Large to X-Large",
+      "Enable query acceleration"
     ],
-    correctAnswer: 1,
-    explanation: "Fail-safe is a data recovery service that provides a 7-day period during which Snowflake Support can recover historical data after the Time Travel retention period has ended. Fail-safe is not user-accessible and requires contacting Snowflake Support.",
-    category: "Data Protection"
+    correctAnswer: 0,
+    explanation: "Clustering keys on large tables enable aggressive partition pruning for range queries, potentially reducing scanned data by 90%+",
+    category: "Performance"
   },
   {
     id: 16,
-    question: "Which Snowflake edition offers up to 90 days of Time Travel?",
+    question: "A table has DATA_RETENTION_TIME_IN_DAYS = 5 on Enterprise Edition. Can you query 7 days ago using Time Travel?",
     options: [
-      "Standard Edition",
-      "Enterprise Edition",
-      "Business Critical Edition",
-      "Virtual Private Snowflake"
+      "Yes, Enterprise supports up to 90 days",
+      "No, retention is set to 5 days only",
+      "Yes, using Fail-safe",
+      "Yes, Time Travel auto-extends"
     ],
     correctAnswer: 1,
-    explanation: "Enterprise Edition and higher (including Business Critical and Virtual Private Snowflake) support Time Travel retention periods of up to 90 days. Standard Edition supports only 1 day of Time Travel.",
+    explanation: "Even on Enterprise, actual retention is determined by the DATA_RETENTION_TIME_IN_DAYS parameter. With 5 days set, you cannot query 7 days ago.",
     category: "Data Protection"
   },
   {
     id: 17,
-    question: "What is the purpose of the COPY command in Snowflake?",
+    question: "You clone a 10 TB database. Developers modify 500 GB. How much additional storage is consumed?",
     options: [
-      "To clone a database",
-      "To load data from staged files into tables",
-      "To backup data automatically",
-      "To copy compute resources"
+      "0 GB",
+      "500 GB",
+      "10 TB",
+      "10.5 TB"
     ],
     correctAnswer: 1,
-    explanation: "The COPY command is used to load data from staged files into Snowflake tables. It's a bulk loading operation that can load data from internal or external stages in various file formats.",
-    category: "Data Loading"
+    explanation: "Zero-copy clones share micro-partitions initially. Only modified micro-partitions consume additional storage, approximately 500 GB in this case.",
+    category: "Data Management"
   },
   {
     id: 18,
-    question: "What is a Snowflake Task?",
+    question: "A stored procedure with dynamic SQL needs to access various schemas. What rights model should be used?",
     options: [
-      "A query optimization feature",
-      "A scheduled SQL statement or procedure that can be executed automatically",
-      "A type of virtual warehouse",
-      "A data sharing object"
+      "EXECUTE AS OWNER",
+      "EXECUTE AS CALLER",
+      "EXECUTE AS ROLE SYSADMIN",
+      "EXECUTE AS ACCOUNTADMIN"
     ],
-    correctAnswer: 1,
-    explanation: "A Task is a Snowflake object that allows you to schedule the execution of SQL statements or stored procedures. Tasks can be run on a schedule or triggered by other tasks, enabling workflow automation.",
-    category: "Automation"
+    correctAnswer: 0,
+    explanation: "EXECUTE AS OWNER allows the procedure to run with owner's privileges, avoiding the need for every caller to have permissions to all accessed schemas.",
+    category: "Security"
   },
   {
     id: 19,
-    question: "What is the result cache in Snowflake?",
+    question: "EU data residency required. US client needs access. What's the correct approach?",
     options: [
-      "A cache that stores raw data files",
-      "A cache that stores query results for 24 hours for identical queries",
-      "A cache for user credentials",
-      "A backup storage location"
+      "Replicate to US region",
+      "Use Secure Sharing in same region",
+      "Export and transfer encrypted",
+      "Create Reader Account in EU region"
     ],
-    correctAnswer: 1,
-    explanation: "The result cache stores the results of queries for 24 hours. If the same query is executed again within that period and the underlying data hasn't changed, Snowflake returns the cached results instantly without consuming compute resources.",
-    category: "Performance"
+    correctAnswer: 3,
+    explanation: "Reader Account in the EU region maintains data residency while providing external access. Data never leaves the EU.",
+    category: "Data Sharing"
   },
   {
     id: 20,
-    question: "Which statement about Snowflake's pricing model is correct?",
+    question: "Query Profile shows 95% time in 'Bytes Sent Over Network'. What's the issue?",
     options: [
-      "You pay for compute and storage together as a bundle",
-      "You pay separately for compute (based on usage) and storage (based on amount stored)",
-      "Storage is free, you only pay for compute",
-      "Compute is free, you only pay for storage"
+      "Warehouse undersized",
+      "Large result set; add filters or LIMIT",
+      "Poor clustering",
+      "Network latency"
     ],
     correctAnswer: 1,
-    explanation: "Snowflake uses a pay-as-you-go pricing model where compute and storage are priced separately. Compute costs are based on the time warehouses are running (measured in credits), while storage costs are based on the average amount of data stored per month.",
-    category: "Pricing"
-  },
-  {
-    id: 21,
-    question: "What is the purpose of clustering keys in Snowflake?",
-    options: [
-      "To encrypt data",
-      "To improve query performance on large tables by organizing micro-partitions",
-      "To share data with other accounts",
-      "To compress data"
-    ],
-    correctAnswer: 1,
-    explanation: "Clustering keys define how data is physically organized in micro-partitions within a table. Properly defined clustering keys can significantly improve query performance on large tables by reducing the number of micro-partitions that need to be scanned.",
+    explanation: "High network time indicates large result set transfer to client. Solution is reducing result set size, not increasing compute.",
     category: "Performance"
   },
   {
-    id: 22,
-    question: "What is a Stream in Snowflake?",
+    id: 21,
+    question: "Task DAG: TaskA -> TaskB -> TaskC. TaskB fails. What happens to TaskC?",
     options: [
-      "A real-time data visualization tool",
-      "An object that records DML changes made to a table",
-      "A type of stage",
-      "A network connection protocol"
+      "TaskC executes normally",
+      "TaskC is skipped",
+      "TaskC waits for manual restart",
+      "All restart from TaskA"
     ],
     correctAnswer: 1,
-    explanation: "A Stream is a Snowflake object that records Data Manipulation Language (DML) changes (inserts, updates, deletes) made to a table. Streams enable change data capture (CDC) and are commonly used with Tasks to create data pipelines.",
-    category: "Data Pipelines"
+    explanation: "When a task fails, all downstream dependent tasks are skipped to prevent cascading data inconsistencies.",
+    category: "Automation"
+  },
+  {
+    id: 22,
+    question: "COPY INTO with 10,000 files. How to load only new files?",
+    options: [
+      "VALIDATION_MODE = 'RETURN_ERRORS'",
+      "FORCE = TRUE",
+      "Default load history tracking",
+      "ON_ERROR = 'SKIP_FILE'"
+    ],
+    correctAnswer: 2,
+    explanation: "COPY INTO automatically tracks load history (64 days) and skips previously loaded files by default based on name, size, and checksum.",
+    category: "Data Loading"
   },
   {
     id: 23,
-    question: "Which warehouse size would you choose for the most compute-intensive workloads?",
+    question: "Materialized view on frequently updated table. What's the compute impact?",
     options: [
-      "X-Small",
-      "Small",
-      "Large",
-      "4X-Large"
+      "No impact; free maintenance",
+      "Background maintenance consumes credits",
+      "Manual REFRESH required",
+      "Each query pays double"
     ],
-    correctAnswer: 3,
-    explanation: "Warehouses range from X-Small to 6X-Large. Larger warehouses have more compute resources and can handle more compute-intensive workloads. A 4X-Large warehouse is one of the largest standard sizes and is suitable for very compute-intensive operations.",
-    category: "Resource Management"
+    correctAnswer: 1,
+    explanation: "Snowflake automatically maintains materialized views using background compute resources that consume credits when base tables change.",
+    category: "Performance"
   },
   {
     id: 24,
-    question: "What does the ACCOUNTADMIN role have access to in Snowflake?",
+    question: "Grant SELECT on all future tables in a schema to a role. Correct syntax?",
     options: [
-      "Only database objects",
-      "Only user management",
-      "All objects and operations in the account, including billing information",
-      "Only read access to all data"
+      "GRANT SELECT ON ALL TABLES IN SCHEMA",
+      "GRANT SELECT ON FUTURE TABLES IN SCHEMA",
+      "Create Task for auto-grants",
+      "Set default privileges"
     ],
-    correctAnswer: 2,
-    explanation: "ACCOUNTADMIN is the most powerful role in Snowflake with full privileges across the entire account. It can manage users, roles, databases, warehouses, resource monitors, and has access to billing and account-level settings.",
+    correctAnswer: 1,
+    explanation: "GRANT ON FUTURE TABLES grants privileges on tables created in the future. Use both ALL and FUTURE for existing and future tables.",
     category: "Security"
   },
   {
     id: 25,
-    question: "What is a Secure View in Snowflake?",
+    question: "Warehouse runs 24 hours with mixed workloads. Recent queries slower. Most likely cause?",
     options: [
-      "A view that is automatically encrypted",
-      "A view whose definition and details are hidden from unauthorized users",
-      "A view that can only be accessed by ACCOUNTADMIN",
-      "A view that is automatically backed up"
+      "Cache filled with irrelevant data",
+      "Warehouse needs restart",
+      "Micro-partition fragmentation",
+      "Concurrent query limit reached"
     ],
-    correctAnswer: 1,
-    explanation: "A Secure View prevents users from viewing the underlying definition and data access paths, protecting sensitive logic and data. The view definition is only visible to authorized users, and the internal query optimizer is restricted to prevent inference of the underlying data.",
-    category: "Security"
-  },
-  {
-    id: 26,
-    question: "What is the difference between internal and external stages?",
-    options: [
-      "Internal stages are faster than external stages",
-      "Internal stages are managed by Snowflake; external stages reference cloud storage",
-      "External stages are more secure than internal stages",
-      "Internal stages can only store CSV files"
-    ],
-    correctAnswer: 1,
-    explanation: "Internal stages are storage locations managed by Snowflake (within Snowflake's infrastructure). External stages reference storage locations outside of Snowflake, such as AWS S3, Azure Blob Storage, or Google Cloud Storage.",
-    category: "Data Loading"
-  },
-  {
-    id: 27,
-    question: "What happens to queries when you resize a running warehouse?",
-    options: [
-      "All running queries are cancelled",
-      "Running queries continue on the current size; new queries use the new size",
-      "All queries are paused and then resumed",
-      "The warehouse must be suspended first"
-    ],
-    correctAnswer: 1,
-    explanation: "When you resize a running warehouse, all currently executing queries continue to run using the original warehouse size. New queries submitted after the resize operation completes will use the new warehouse size.",
-    category: "Resource Management"
-  },
-  {
-    id: 28,
-    question: "What is a Materialized View in Snowflake?",
-    options: [
-      "A regular view with better security",
-      "A pre-computed view that stores query results and is automatically maintained",
-      "A view that can only be created by ACCOUNTADMIN",
-      "A temporary view that expires after 24 hours"
-    ],
-    correctAnswer: 1,
-    explanation: "A Materialized View is a pre-computed view whose results are stored in a table-like structure. Snowflake automatically maintains and updates the materialized view when the base table data changes, improving query performance for repeated queries.",
+    correctAnswer: 0,
+    explanation: "Warehouse cache becomes filled with diverse query data over time, reducing cache efficiency. Suspending/resuming can help restore cache efficiency.",
     category: "Performance"
   },
   {
-    id: 29,
-    question: "Which metadata repository stores information about Snowflake objects?",
+    id: 26,
+    question: "Show masked PII to analysts but full values to privileged users. Best feature?",
     options: [
-      "Information Schema",
-      "Data Dictionary",
-      "System Catalog",
-      "Meta Database"
+      "Separate masked tables",
+      "Dynamic Data Masking policies",
+      "Row Access Policies",
+      "Secure views with CURRENT_ROLE()"
+    ],
+    correctAnswer: 1,
+    explanation: "Dynamic Data Masking automatically masks column data based on user's role without requiring separate tables or views.",
+    category: "Security"
+  },
+  {
+    id: 27,
+    question: "DELETE removes 40% of rows from 1 TB table. Immediate storage impact?",
+    options: [
+      "Reduces 40% immediately",
+      "Remains same until Time Travel expires",
+      "Increases temporarily",
+      "Reduces after VACUUM"
+    ],
+    correctAnswer: 1,
+    explanation: "Original micro-partitions retained for Time Travel/Fail-safe. Storage only reduces after data ages out (up to 97 days on Enterprise).",
+    category: "Data Management"
+  },
+  {
+    id: 28,
+    question: "Stream created with APPEND_ONLY = TRUE. What changes are captured?",
+    options: [
+      "Only INSERT operations",
+      "INSERT and UPDATE",
+      "INSERT and DELETE",
+      "All DML marked as appends"
     ],
     correctAnswer: 0,
-    explanation: "The Information Schema is a set of system-defined views that provide metadata about objects in Snowflake, including databases, schemas, tables, columns, views, and other database objects. It follows the SQL standard for information schemas.",
+    explanation: "APPEND_ONLY streams capture only INSERT operations, more efficient for append-only data patterns like logs.",
+    category: "Data Pipelines"
+  },
+  {
+    id: 29,
+    question: "Which feature provides automatic connection failover and retry?",
+    options: [
+      "Multi-cluster warehouses",
+      "Connection pooling",
+      "Client redirect for connection resilience",
+      "Database replication"
+    ],
+    correctAnswer: 2,
+    explanation: "Snowflake's client redirect functionality automatically handles connection failures and redirects to available endpoints.",
     category: "Architecture"
   },
   {
     id: 30,
-    question: "What is the purpose of a File Format object in Snowflake?",
+    question: "Search optimization enabled on table. How does it affect highly selective filters (<1% rows)?",
     options: [
-      "To compress files automatically",
-      "To define parsing rules for loading or unloading data files",
-      "To encrypt files in stages",
-      "To schedule file loading operations"
+      "No impact on selective queries",
+      "Significantly improves equality and IN predicates",
+      "Only helps with clustering keys",
+      "Degrades performance"
     ],
     correctAnswer: 1,
-    explanation: "A File Format object defines the format of data files (CSV, JSON, Parquet, etc.) and specifies parsing options such as delimiters, compression, date formats, and error handling. This makes it easy to reuse the same format settings across multiple COPY commands.",
-    category: "Data Loading"
-  },
-  {
-    id: 31,
-    question: "What is the minimum warehouse size in Snowflake?",
-    options: [
-      "Nano",
-      "Micro",
-      "X-Small",
-      "Small"
-    ],
-    correctAnswer: 2,
-    explanation: "X-Small is the smallest warehouse size in Snowflake. Warehouses scale in multiples of two, going from X-Small to Small, Medium, Large, X-Large, 2X-Large, 3X-Large, 4X-Large, 5X-Large, and 6X-Large.",
-    category: "Resource Management"
-  },
-  {
-    id: 32,
-    question: "Which type of table is best for storing temporary data that is only needed for the duration of a session?",
-    options: [
-      "Permanent Table",
-      "Transient Table",
-      "Temporary Table",
-      "External Table"
-    ],
-    correctAnswer: 2,
-    explanation: "Temporary Tables exist only for the duration of the session and are automatically dropped when the session ends. They don't have Fail-safe and are ideal for storing intermediate results or temporary data during ETL processes.",
-    category: "Data Management"
-  },
-  {
-    id: 33,
-    question: "What is the primary difference between Transient and Permanent tables?",
-    options: [
-      "Transient tables are faster to query",
-      "Transient tables do not have Fail-safe protection",
-      "Transient tables cannot be cloned",
-      "Transient tables are read-only"
-    ],
-    correctAnswer: 1,
-    explanation: "Transient tables have Time Travel (up to 1 day) but do not have Fail-safe protection. This reduces storage costs compared to Permanent tables, which have both Time Travel and 7-day Fail-safe. Transient tables are useful for data that doesn't require the highest level of data protection.",
-    category: "Data Management"
-  },
-  {
-    id: 34,
-    question: "What is the purpose of the GET command in Snowflake?",
-    options: [
-      "To retrieve query results",
-      "To download files from a Snowflake stage to a local directory",
-      "To obtain metadata about tables",
-      "To get the current warehouse size"
-    ],
-    correctAnswer: 1,
-    explanation: "The GET command downloads files from a Snowflake internal stage (user stage, table stage, or named internal stage) to a local directory. It's commonly used in SnowSQL or client applications to retrieve staged files.",
-    category: "Data Loading"
-  },
-  {
-    id: 35,
-    question: "Which feature allows you to automatically suspend a warehouse after a period of inactivity?",
-    options: [
-      "Auto-pause",
-      "Auto-suspend",
-      "Auto-shutdown",
-      "Auto-terminate"
-    ],
-    correctAnswer: 1,
-    explanation: "Auto-suspend automatically suspends a warehouse after a specified period of inactivity (no queries running). This helps control costs by ensuring warehouses don't continue consuming credits when not in use.",
-    category: "Resource Management"
-  },
-  {
-    id: 36,
-    question: "What is the purpose of a Resource Monitor in Snowflake?",
-    options: [
-      "To monitor query performance",
-      "To control and monitor credit usage by warehouses",
-      "To track user login activity",
-      "To monitor data loading operations"
-    ],
-    correctAnswer: 1,
-    explanation: "Resource Monitors allow you to set credit usage limits on account or individual warehouse level. They can trigger notifications or suspend warehouses when specified credit thresholds are reached, helping control and monitor costs.",
-    category: "Resource Management"
-  },
-  {
-    id: 37,
-    question: "What is the Account Usage view in Snowflake?",
-    options: [
-      "A view showing current active users",
-      "A set of views providing historical usage data for the entire account",
-      "A dashboard for monitoring warehouse performance",
-      "A report of data storage costs"
-    ],
-    correctAnswer: 1,
-    explanation: "Account Usage views are system-defined views in the SNOWFLAKE database that provide historical data about account-level usage, including queries, logins, storage, data transfers, and more. They retain data for up to 365 days and have a latency of 45 minutes to 3 hours.",
-    category: "Monitoring"
-  },
-  {
-    id: 38,
-    question: "Which Snowflake feature enables you to query data in external cloud storage without loading it?",
-    options: [
-      "External Stages",
-      "External Tables",
-      "External Views",
-      "External Functions"
-    ],
-    correctAnswer: 1,
-    explanation: "External Tables allow you to query data stored in files in external cloud storage (S3, Azure Blob, GCS) without loading the data into Snowflake. The data remains in the external storage and is read at query time.",
-    category: "Data Loading"
-  },
-  {
-    id: 39,
-    question: "What is the maximum size of a single row in Snowflake?",
-    options: [
-      "16 KB",
-      "16 MB",
-      "128 MB",
-      "No limit"
-    ],
-    correctAnswer: 1,
-    explanation: "The maximum size of a single row in Snowflake is 16 MB. This includes all columns in the row. If data exceeds this limit, you'll need to restructure it, possibly by splitting data across multiple rows or using file references.",
-    category: "Architecture"
-  },
-  {
-    id: 40,
-    question: "What happens when you clone a database in Snowflake?",
-    options: [
-      "All data is physically copied, doubling storage costs",
-      "A metadata copy is created with no additional storage until changes are made",
-      "Only the schema is copied, not the data",
-      "The original database is locked during cloning"
-    ],
-    correctAnswer: 1,
-    explanation: "Cloning a database uses Zero-Copy Cloning, which creates a metadata copy that points to the original data. No physical data is copied initially, so there's no additional storage cost. Storage costs only increase as changes are made to either the original or the clone.",
-    category: "Data Management"
-  },
-  {
-    id: 41,
-    question: "What is the purpose of Data Sharing in Snowflake?",
-    options: [
-      "To split storage costs between departments",
-      "To share live data between Snowflake accounts without copying or moving data",
-      "To backup data across regions",
-      "To compress shared data automatically"
-    ],
-    correctAnswer: 1,
-    explanation: "Data Sharing allows you to share live, read-only data between Snowflake accounts instantly without copying or transferring the data. The data provider creates a share containing database objects, and consumers can access the shared data in real-time.",
-    category: "Data Sharing"
-  },
-  {
-    id: 42,
-    question: "Which caching layer stores raw data extracted from micro-partitions?",
-    options: [
-      "Result Cache",
-      "Metadata Cache",
-      "Local Disk Cache (SSD)",
-      "Remote Disk Cache"
-    ],
-    correctAnswer: 2,
-    explanation: "The Local Disk Cache (also called SSD cache or warehouse cache) stores raw data extracted from micro-partitions. It's local to each warehouse and persists for the life of the warehouse, improving performance for repeated queries that access the same data.",
+    explanation: "Search Optimization Service dramatically improves highly selective point lookup queries (equality, IN, substring searches).",
     category: "Performance"
   },
   {
-    id: 43,
-    question: "What is the role hierarchy concept in Snowflake?",
+    id: 31,
+    question: "Loading 1 GB: 1,000 small files (1 MB each) vs. 10 large files (100 MB each). Which is TRUE?",
     options: [
-      "Roles cannot be assigned to other roles",
-      "Roles can be granted to other roles, creating a hierarchy where higher roles inherit privileges",
-      "Only ACCOUNTADMIN can have multiple roles",
-      "Role hierarchy is limited to three levels"
+      "Small files load faster due to parallelism",
+      "Large files preferred; small files create overhead",
+      "File size doesn't impact performance",
+      "Small files better for Snowpipe"
     ],
     correctAnswer: 1,
-    explanation: "Snowflake supports role hierarchies where roles can be granted to other roles. A role inherits all privileges from any roles granted to it, creating a hierarchy. This allows for flexible and scalable access control management.",
+    explanation: "Snowflake recommends 100-250 MB files. Many small files create overhead and reduce efficiency. Consolidate into larger files.",
+    category: "Data Loading"
+  },
+  {
+    id: 32,
+    question: "Role hierarchy: ROLE_A granted to ROLE_B, ROLE_B granted to ROLE_C. User with ROLE_C runs query. Which privileges available?",
+    options: [
+      "Only ROLE_C",
+      "ROLE_C and ROLE_B only",
+      "All three roles (A, B, C)",
+      "None until explicit switch"
+    ],
+    correctAnswer: 2,
+    explanation: "Privileges are additive and inherited. ROLE_C inherits all privileges from ROLE_B and ROLE_A through the role hierarchy.",
+    category: "Security"
+  },
+  {
+    id: 33,
+    question: "External function calls AWS Lambda taking 30 seconds. What happens to query?",
+    options: [
+      "Query fails after 10 seconds",
+      "Query waits for Lambda and incorporates results",
+      "Query continues asynchronously",
+      "External functions limited to 5 seconds"
+    ],
+    correctAnswer: 1,
+    explanation: "External functions are synchronous - queries wait for external service to complete and return results within timeout limits.",
+    category: "Architecture"
+  },
+  {
+    id: 34,
+    question: "VARIANT column with JSON. Queries extracting attributes are slow on large warehouse. Most effective optimization?",
+    options: [
+      "Enable clustering on VARIANT",
+      "Extract attributes into materialized generated columns",
+      "Convert VARIANT to VARCHAR",
+      "Enable search optimization on VARIANT"
+    ],
+    correctAnswer: 1,
+    explanation: "Materialized generated columns extract JSON attributes into regular columns, enabling partition pruning and clustering.",
+    category: "Performance"
+  },
+  {
+    id: 35,
+    question: "Task with WAREHOUSE = NULL. What compute does it use?",
+    options: [
+      "Task fails - no warehouse",
+      "Uses account default warehouse",
+      "Uses Snowflake-managed serverless compute",
+      "Uses child task warehouse"
+    ],
+    correctAnswer: 2,
+    explanation: "WAREHOUSE = NULL means the task uses Snowflake-managed serverless compute resources, useful for lightweight orchestration.",
+    category: "Automation"
+  },
+  {
+    id: 36,
+    question: "Join TABLE_A (1B rows) with TABLE_B (1,000 rows). Which join strategy most likely?",
+    options: [
+      "Merge join",
+      "Nested loop join",
+      "Broadcast join (broadcasting TABLE_B)",
+      "Hash join with TABLE_A as build"
+    ],
+    correctAnswer: 2,
+    explanation: "For large-small table joins, Snowflake typically broadcasts the small table to all nodes processing the large table.",
+    category: "Performance"
+  },
+  {
+    id: 37,
+    question: "Automatically expire data older than 7 years for compliance. Best approach?",
+    options: [
+      "Set DATA_RETENTION_TIME_IN_DAYS = 2555",
+      "Create Task running DELETE statements daily",
+      "Use Stream to remove old records",
+      "Partition and drop old partitions"
+    ],
+    correctAnswer: 1,
+    explanation: "DATA_RETENTION controls Time Travel, not lifecycle. Use scheduled Task with DELETE for automatic data expiration.",
+    category: "Data Management"
+  },
+  {
+    id: 38,
+    question: "Query with WHERE col_a IN (SELECT col_b FROM table_x). Poor performance. First optimization?",
+    options: [
+      "Replace with EXISTS subquery",
+      "Materialize table_x in temp table",
+      "Convert to JOIN",
+      "Add indexes"
+    ],
+    correctAnswer: 2,
+    explanation: "Snowflake optimizes JOINs better than subqueries in WHERE. Converting to JOIN allows better optimization and parallelization.",
+    category: "Performance"
+  },
+  {
+    id: 39,
+    question: "Multiple databases to replicate. One 100 TB database rarely changes. Cost-effective strategy?",
+    options: [
+      "Replicate all on same schedule",
+      "Different schedules based on change frequency",
+      "Disable replication for static DB",
+      "Enable continuous for all"
+    ],
+    correctAnswer: 1,
+    explanation: "Replication only transfers changed data. Reduce frequency for static databases to balance RPO and costs.",
+    category: "Data Management"
+  },
+  {
+    id: 40,
+    question: "Python UDF called for each row in 100M row table. Poor performance. Most likely cause?",
+    options: [
+      "Python slower than SQL",
+      "UDFs cannot be parallelized",
+      "Row-by-row overhead; consider vectorized UDFs",
+      "Warehouse too small"
+    ],
+    correctAnswer: 2,
+    explanation: "Scalar UDFs process one row at a time. Vectorized Python UDFs process batches using pandas, providing 10-100x improvement.",
+    category: "Performance"
+  },
+  {
+    id: 41,
+    question: "Network policy restricts access. User works fine from office but not home. Likely reason?",
+    options: [
+      "Home IP blocked by network policy",
+      "User needs VPN",
+      "MFA required for remote",
+      "Snowflake doesn't support residential IPs"
+    ],
+    correctAnswer: 0,
+    explanation: "Network policies restrict by IP ranges. If policy only allows office IPs, home connections are blocked.",
+    category: "Security"
+  },
+  {
+    id: 42,
+    question: "COPY INTO loads files, but later files in batch take longer. Most likely cause?",
+    options: [
+      "Warehouse fatigue",
+      "Local disk cache fills up",
+      "Network throttling",
+      "Later files are larger"
+    ],
+    correctAnswer: 1,
+    explanation: "Warehouse cache fills during bulk loads. As cache fills, performance degrades due to cache management overhead.",
+    category: "Data Loading"
+  },
+  {
+    id: 43,
+    question: "Secure view joins multiple tables. Users with SELECT on view cannot query. Most likely issue?",
+    options: [
+      "Users need SELECT on underlying tables too",
+      "Secure views require special privileges",
+      "Need EXECUTE privilege",
+      "Secure views cannot join tables"
+    ],
+    correctAnswer: 0,
+    explanation: "Users need SELECT on both the view AND underlying tables (unless using definer's rights model).",
     category: "Security"
   },
   {
     id: 44,
-    question: "What is the purpose of the PUT command in Snowflake?",
+    question: "Application generates 1,000 small INSERTs per second. Poor performance and high costs. Best optimization?",
     options: [
-      "To insert data directly into tables",
-      "To upload files from a local directory to a Snowflake stage",
-      "To update existing records",
-      "To create new stages"
+      "Use larger warehouse",
+      "Batch inserts into larger transactions",
+      "Create clustered index",
+      "Enable auto-commit"
     ],
     correctAnswer: 1,
-    explanation: "The PUT command uploads files from a local file system to a Snowflake internal stage (user, table, or named stage). It's commonly used in SnowSQL or other clients to stage data files before loading them into tables.",
-    category: "Data Loading"
-  },
-  {
-    id: 45,
-    question: "What is a Data Marketplace in Snowflake?",
-    options: [
-      "A platform to buy and sell Snowflake credits",
-      "A platform to discover and access third-party data and data services",
-      "A tool for managing internal data shares",
-      "A storage optimization service"
-    ],
-    correctAnswer: 1,
-    explanation: "Snowflake Data Marketplace is a platform where users can discover, access, and purchase third-party data and data services from various providers. It enables secure data sharing and monetization directly within Snowflake.",
-    category: "Data Sharing"
-  },
-  {
-    id: 46,
-    question: "What type of encryption does Snowflake use for data at rest?",
-    options: [
-      "No encryption",
-      "AES 128-bit encryption",
-      "AES 256-bit encryption",
-      "RSA encryption"
-    ],
-    correctAnswer: 2,
-    explanation: "Snowflake automatically encrypts all data at rest using AES 256-bit encryption. This encryption is transparent to users and included by default with no additional configuration or performance impact.",
-    category: "Security"
-  },
-  {
-    id: 47,
-    question: "What is the default retention period for Time Travel in Standard Edition?",
-    options: [
-      "0 days (disabled)",
-      "1 day",
-      "7 days",
-      "30 days"
-    ],
-    correctAnswer: 1,
-    explanation: "In Snowflake Standard Edition, the default and maximum Time Travel retention period is 1 day. This can be configured at the account, database, schema, or table level, but cannot exceed 1 day in Standard Edition.",
-    category: "Data Protection"
-  },
-  {
-    id: 48,
-    question: "Which command is used to unload data from Snowflake to a stage?",
-    options: [
-      "EXPORT",
-      "UNLOAD",
-      "COPY INTO <stage>",
-      "EXTRACT"
-    ],
-    correctAnswer: 2,
-    explanation: "The COPY INTO <stage> command unloads data from a Snowflake table to a stage (internal or external). The data is typically unloaded in formats like CSV, JSON, or Parquet for use in external systems.",
-    category: "Data Loading"
-  },
-  {
-    id: 49,
-    question: "What is the purpose of Query Acceleration Service in Snowflake?",
-    options: [
-      "To automatically increase warehouse size",
-      "To accelerate portions of queries that can benefit from additional compute resources",
-      "To cache all query results permanently",
-      "To compress query results"
-    ],
-    correctAnswer: 1,
-    explanation: "Query Acceleration Service is an optional feature that can accelerate portions of query workloads. It automatically offloads parts of queries to shared compute resources, improving performance without requiring warehouse size increases.",
+    explanation: "Snowflake optimized for bulk operations. Batch many rows into larger INSERT statements for better performance and lower costs.",
     category: "Performance"
   },
   {
-    id: 50,
-    question: "What is Network Policy in Snowflake used for?",
+    id: 45,
+    question: "Materialized view on frequently updated table is often stale after weeks. What could cause this?",
     options: [
-      "To optimize network performance",
-      "To restrict access to Snowflake based on IP addresses",
-      "To configure data sharing bandwidth",
-      "To set up VPN connections"
+      "Materialized views don't auto-refresh",
+      "Updates too frequent for maintenance",
+      "Background service has insufficient resources",
+      "Views expire after 30 days"
+    ],
+    correctAnswer: 2,
+    explanation: "If base table updates very frequently or view is complex, background maintenance may not keep up, causing staleness.",
+    category: "Performance"
+  },
+  {
+    id: 46,
+    question: "Loading complex nested XML files. Recommended approach?",
+    options: [
+      "Load into VARCHAR and parse with SQL",
+      "Load into VARIANT; XML auto-parsed",
+      "Pre-convert XML to JSON, load into VARIANT",
+      "Use external tables for XML"
+    ],
+    correctAnswer: 2,
+    explanation: "XML isn't automatically parsed like JSON. Convert to JSON before loading into VARIANT for efficient querying.",
+    category: "Data Loading"
+  },
+  {
+    id: 47,
+    question: "Query runs in 5s on Small warehouse, 4s on X-Large (16x larger). Most likely explanation?",
+    options: [
+      "Query not parallelizable enough",
+      "Result cache used second time",
+      "X-Large has slower nodes",
+      "Hit concurrency limit"
+    ],
+    correctAnswer: 0,
+    explanation: "Not all queries benefit from larger warehouses. Fast, I/O-bound, or non-parallelizable queries won't see proportional improvements.",
+    category: "Resource Management"
+  },
+  {
+    id: 48,
+    question: "Large table performs well in morning but degrades in afternoon. Most likely cause?",
+    options: [
+      "Cache cleared at noon",
+      "Afternoon DML causes clustering degradation",
+      "More concurrent users afternoon",
+      "Time Travel overhead increases"
     ],
     correctAnswer: 1,
-    explanation: "Network Policies allow administrators to restrict access to Snowflake accounts based on IP address whitelisting or blacklisting. This adds an additional layer of security by controlling which IP addresses can connect to your Snowflake account.",
-    category: "Security"
+    explanation: "Heavy DML during the day causes clustering degradation over time, reducing query performance by afternoon.",
+    category: "Performance"
+  },
+  {
+    id: 49,
+    question: "External stage with AUTO_REFRESH = TRUE. New files added but don't appear in queries. What's missing?",
+    options: [
+      "AUTO_REFRESH only works with internal stages",
+      "Event notifications from cloud storage not configured",
+      "External tables must be manually refreshed",
+      "Need ALTER STAGE REFRESH"
+    ],
+    correctAnswer: 1,
+    explanation: "AUTO_REFRESH requires configuring cloud storage event notifications (S3 Events, Azure Event Grid, GCS Pub/Sub) to Snowflake.",
+    category: "Data Loading"
+  },
+  {
+    id: 50,
+    question: "Table with 5 years data. Queries typically filter last 30 days. Best design for performance and cost?",
+    options: [
+      "Clustering key on date",
+      "Partition into separate current and historical tables",
+      "Use search optimization",
+      "Materialized view for last 30 days"
+    ],
+    correctAnswer: 1,
+    explanation: "Separate hot (current) and cold (historical) data into different tables. Current table optimized for performance, historical for cost.",
+    category: "Architecture"
   }
 ];
